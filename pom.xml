@@ -234,6 +234,28 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
+
+            <!-- MySQL Maven Plugin -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sql-maven-plugin</artifactId>
+                <version>1.5</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.mysql</groupId>
+                        <artifactId>mysql-connector-j</artifactId>
+                        <version>9.2.0</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>com.mysql.cj.jdbc.Driver</driver>
+                    <url>jdbc:mysql://101.126.23.137:3306/eladmin?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false</url>
+                    <username>root</username>
+                    <password>Jimu131207!</password>
+                    <sqlFile>d:\work\test\el\b3\eladmin\sql\limiter.sql</sqlFile>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
