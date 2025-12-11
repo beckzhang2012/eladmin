@@ -7,6 +7,19 @@ spring:
       url: jdbc:p6spy:mysql://101.126.23.137:3306/eladmin?serverTimezone=Asia/Shanghai&characterEncoding=utf8&useSSL=false
       username: root
       password: Jimu131207!
+  # Redis配置
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+    timeout: 6000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
       # 初始连接数，建议设置为与最小空闲连接数相同
       initial-size: 20
       # 最小空闲连接数，保持足够的空闲连接以应对请求
