@@ -44,7 +44,7 @@ public class SysLogController {
 
     private final SysLogService sysLogService;
 
-    @Log("导出数据")
+    @Log(value = "导出数据", module = "日志管理", action = "导出")
     @ApiOperation("导出数据")
     @GetMapping(value = "/download")
     @PreAuthorize("@el.check()")
@@ -53,7 +53,7 @@ public class SysLogController {
         sysLogService.download(sysLogService.queryAll(criteria), response);
     }
 
-    @Log("导出错误数据")
+    @Log(value = "导出错误数据", module = "日志管理", action = "导出")
     @ApiOperation("导出错误数据")
     @GetMapping(value = "/error/download")
     @PreAuthorize("@el.check()")
@@ -92,7 +92,7 @@ public class SysLogController {
         return new ResponseEntity<>(sysLogService.findByErrDetail(id), HttpStatus.OK);
     }
     @DeleteMapping(value = "/del/error")
-    @Log("删除所有ERROR日志")
+    @Log(value = "删除所有ERROR日志", module = "日志管理", action = "删除")
     @ApiOperation("删除所有ERROR日志")
     @PreAuthorize("@el.check()")
     public ResponseEntity<Object> delAllErrorLog(){

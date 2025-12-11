@@ -68,6 +68,7 @@ public class UserController {
     private final RoleService roleService;
     private final VerifyService verificationCodeService;
 
+    @Log(value = "导出用户数据", module = "用户管理", action = "导出")
     @ApiOperation("导出用户数据")
     @GetMapping(value = "/download")
     @PreAuthorize("@el.check('user:list')")
@@ -75,6 +76,7 @@ public class UserController {
         userService.download(userService.queryAll(criteria), response);
     }
 
+    @Log(value = "查询用户", module = "用户管理", action = "查询")
     @ApiOperation("查询用户")
     @GetMapping
     @PreAuthorize("@el.check('user:list')")
@@ -103,7 +105,7 @@ public class UserController {
         return new ResponseEntity<>(PageUtil.noData(),HttpStatus.OK);
     }
 
-    @Log("新增用户")
+    @Log(value = "新增用户", module = "用户管理", action = "新增")
     @ApiOperation("新增用户")
     @PostMapping
     @PreAuthorize("@el.check('user:add')")
@@ -115,7 +117,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Log("修改用户")
+    @Log(value = "修改用户", module = "用户管理", action = "修改")
     @ApiOperation("修改用户")
     @PutMapping
     @PreAuthorize("@el.check('user:edit')")
@@ -136,7 +138,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("删除用户")
+    @Log(value = "删除用户", module = "用户管理", action = "删除")
     @ApiOperation("删除用户")
     @DeleteMapping
     @PreAuthorize("@el.check('user:del')")
@@ -152,6 +154,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Log(value = "修改密码", module = "用户管理", action = "修改")
     @ApiOperation("修改密码")
     @PostMapping(value = "/updatePass")
     public ResponseEntity<Object> updateUserPass(@RequestBody UserPassVo passVo) throws Exception {
@@ -168,6 +171,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Log(value = "重置密码", module = "用户管理", action = "修改")
     @ApiOperation("重置密码")
     @PutMapping(value = "/resetPwd")
     public ResponseEntity<Object> resetPwd(@RequestBody Set<Long> ids) {
@@ -176,6 +180,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Log(value = "修改头像", module = "用户管理", action = "修改")
     @ApiOperation("修改头像")
     @PostMapping(value = "/updateAvatar")
     public ResponseEntity<Object> updateUserAvatar(@RequestParam MultipartFile avatar){

@@ -44,4 +44,16 @@ public class SysLogSmallDto implements Serializable {
 
     @ApiModelProperty(value = "创建时间")
     private Timestamp createTime;
+
+    @ApiModelProperty(value = "模块")
+    private String module;
+
+    @ApiModelProperty(value = "动作")
+    private String action;
+
+    @ApiModelProperty(value = "目标ID")
+    private String targetId;
+
+    @ApiModelProperty(value = "结果")
+    private String result;
 }

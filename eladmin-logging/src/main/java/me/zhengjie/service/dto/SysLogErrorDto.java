@@ -48,6 +48,18 @@ public class SysLogErrorDto implements Serializable {
     @ApiModelProperty(value = "请求ip")
     private String requestIp;
 
+    @ApiModelProperty(value = "模块")
+    private String module;
+
+    @ApiModelProperty(value = "动作")
+    private String action;
+
+    @ApiModelProperty(value = "目标ID")
+    private String targetId;
+
+    @ApiModelProperty(value = "结果")
+    private String result;
+
     @ApiModelProperty(value = "地址")
     private String address;
 
