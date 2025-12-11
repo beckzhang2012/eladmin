@@ -41,6 +41,14 @@ public class SysLogQueryCriteria {
     @ApiModelProperty(value = "日志类型")
     private String logType;
 
+    @Query
+    @ApiModelProperty(value = "模块")
+    private String module;
+
+    @Query
+    @ApiModelProperty(value = "动作")
+    private String action;
+
     @ApiModelProperty(value = "创建时间")
     @Query(type = Query.Type.BETWEEN)
     private List<Timestamp> createTime;

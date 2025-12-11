@@ -16,12 +16,14 @@
 package me.zhengjie.aspect;
 
 import lombok.extern.slf4j.Slf4j;
+import me.zhengjie.annotation.Log;
 import me.zhengjie.domain.SysLog;
 import me.zhengjie.service.SysLogService;
 import me.zhengjie.utils.RequestHolder;
 import me.zhengjie.utils.SecurityUtils;
 import me.zhengjie.utils.StringUtils;
 import me.zhengjie.utils.ThrowableUtil;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -66,7 +68,13 @@ public class LogAspect {
         Object result;
         currentTime.set(System.currentTimeMillis());
         result = joinPoint.proceed();
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Log log = signature.getMethod().getAnnotation(Log.class);
+        String module = log.module();
+        String action = log.action();
         SysLog sysLog = new SysLog("INFO",System.currentTimeMillis() - currentTime.get());
+        sysLog.setModule(module);
+        sysLog.setAction(action);
         currentTime.remove();
         HttpServletRequest request = RequestHolder.getHttpServletRequest();
         sysLogService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getIp(request),joinPoint, sysLog);
@@ -81,7 +89,13 @@ public class LogAspect {
      */
     @AfterThrowing(pointcut = "logPointcut()", throwing = "e")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable e) {
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Log log = signature.getMethod().getAnnotation(Log.class);
+        String module = log.module();
+        String action = log.action();
         SysLog sysLog = new SysLog("ERROR",System.currentTimeMillis() - currentTime.get());
+        sysLog.setModule(module);
+        sysLog.setAction(action);
         currentTime.remove();
         sysLog.setExceptionDetail(ThrowableUtil.getStackTrace(e).getBytes());
         HttpServletRequest request = RequestHolder.getHttpServletRequest();

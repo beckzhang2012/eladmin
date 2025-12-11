@@ -55,6 +55,7 @@ public class RoleController {
 
     private static final String ENTITY_NAME = "role";
 
+    @Log(value = "获取单个角色", module = "角色管理", action = "查询")
     @ApiOperation("获取单个role")
     @GetMapping(value = "/{id}")
     @PreAuthorize("@el.check('roles:list')")
@@ -62,6 +63,7 @@ public class RoleController {
         return new ResponseEntity<>(roleService.findById(id), HttpStatus.OK);
     }
 
+    @Log(value = "导出角色数据", module = "角色管理", action = "导出")
     @ApiOperation("导出角色数据")
     @GetMapping(value = "/download")
     @PreAuthorize("@el.check('role:list')")
@@ -69,6 +71,7 @@ public class RoleController {
         roleService.download(roleService.queryAll(criteria), response);
     }
 
+    @Log(value = "返回全部角色", module = "角色管理", action = "查询")
     @ApiOperation("返回全部的角色")
     @GetMapping(value = "/all")
     @PreAuthorize("@el.check('roles:list','user:add','user:edit')")
@@ -76,6 +79,7 @@ public class RoleController {
         return new ResponseEntity<>(roleService.queryAll(),HttpStatus.OK);
     }
 
+    @Log(value = "查询角色", module = "角色管理", action = "查询")
     @ApiOperation("查询角色")
     @GetMapping
     @PreAuthorize("@el.check('roles:list')")
@@ -83,13 +87,14 @@ public class RoleController {
         return new ResponseEntity<>(roleService.queryAll(criteria,pageable),HttpStatus.OK);
     }
 
+    @Log(value = "获取用户级别", module = "角色管理", action = "查询")
     @ApiOperation("获取用户级别")
     @GetMapping(value = "/level")
     public ResponseEntity<Object> getRoleLevel(){
         return new ResponseEntity<>(Dict.create().set("level", getLevels(null)),HttpStatus.OK);
     }
 
-    @Log("新增角色")
+    @Log(value = "新增角色", module = "角色管理", action = "新增")
     @ApiOperation("新增角色")
     @PostMapping
     @PreAuthorize("@el.check('roles:add')")
@@ -102,7 +107,7 @@ public class RoleController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Log("修改角色")
+    @Log(value = "修改角色", module = "角色管理", action = "修改")
     @ApiOperation("修改角色")
     @PutMapping
     @PreAuthorize("@el.check('roles:edit')")
@@ -112,7 +117,7 @@ public class RoleController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("修改角色菜单")
+    @Log(value = "修改角色菜单", module = "角色管理", action = "修改")
     @ApiOperation("修改角色菜单")
     @PutMapping(value = "/menu")
     @PreAuthorize("@el.check('roles:edit')")
@@ -123,7 +128,7 @@ public class RoleController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("删除角色")
+    @Log(value = "删除角色", module = "角色管理", action = "删除")
     @ApiOperation("删除角色")
     @DeleteMapping
     @PreAuthorize("@el.check('roles:del')")

@@ -54,6 +54,7 @@ public class MenuController {
     private final MenuMapper menuMapper;
     private static final String ENTITY_NAME = "menu";
 
+    @Log(value = "导出菜单数据", module = "菜单管理", action = "导出")
     @ApiOperation("导出菜单数据")
     @GetMapping(value = "/download")
     @PreAuthorize("@el.check('menu:list')")
@@ -61,6 +62,7 @@ public class MenuController {
         menuService.download(menuService.queryAll(criteria, false), response);
     }
 
+    @Log(value = "获取前端所需菜单", module = "菜单管理", action = "查询")
     @GetMapping(value = "/build")
     @ApiOperation("获取前端所需菜单")
     public ResponseEntity<List<MenuVo>> buildMenus(){
@@ -69,6 +71,7 @@ public class MenuController {
         return new ResponseEntity<>(menuService.buildMenus(menus),HttpStatus.OK);
     }
 
+    @Log(value = "返回全部的菜单", module = "菜单管理", action = "查询")
     @ApiOperation("返回全部的菜单")
     @GetMapping(value = "/lazy")
     @PreAuthorize("@el.check('menu:list','roles:list')")
@@ -76,6 +79,7 @@ public class MenuController {
         return new ResponseEntity<>(menuService.getMenus(pid),HttpStatus.OK);
     }
 
+    @Log(value = "根据菜单ID返回所有子节点ID", module = "菜单管理", action = "查询")
     @ApiOperation("根据菜单ID返回所有子节点ID，包含自身ID")
     @GetMapping(value = "/child")
     @PreAuthorize("@el.check('menu:list','roles:list')")
@@ -88,6 +92,7 @@ public class MenuController {
         return new ResponseEntity<>(ids,HttpStatus.OK);
     }
 
+    @Log(value = "查询菜单", module = "菜单管理", action = "查询")
     @GetMapping
     @ApiOperation("查询菜单")
     @PreAuthorize("@el.check('menu:list')")
@@ -96,6 +101,7 @@ public class MenuController {
         return new ResponseEntity<>(PageUtil.toPage(menuDtoList, menuDtoList.size()),HttpStatus.OK);
     }
 
+    @Log(value = "查询菜单同级与上级数据", module = "菜单管理", action = "查询")
     @ApiOperation("查询菜单:根据ID获取同级与上级数据")
     @PostMapping("/superior")
     @PreAuthorize("@el.check('menu:list')")
@@ -119,7 +125,7 @@ public class MenuController {
         return new ResponseEntity<>(menuService.getMenus(null),HttpStatus.OK);
     }
 
-    @Log("新增菜单")
+    @Log(value = "新增菜单", module = "菜单管理", action = "新增")
     @ApiOperation("新增菜单")
     @PostMapping
     @PreAuthorize("@el.check('menu:add')")
@@ -131,7 +137,7 @@ public class MenuController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Log("修改菜单")
+    @Log(value = "修改菜单", module = "菜单管理", action = "修改")
     @ApiOperation("修改菜单")
     @PutMapping
     @PreAuthorize("@el.check('menu:edit')")
@@ -140,7 +146,7 @@ public class MenuController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("删除菜单")
+    @Log(value = "删除菜单", module = "菜单管理", action = "删除")
     @ApiOperation("删除菜单")
     @DeleteMapping
     @PreAuthorize("@el.check('menu:del')")

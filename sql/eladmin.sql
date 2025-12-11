@@ -336,9 +336,15 @@ CREATE TABLE `sys_log` (
   `browser` varchar(255) DEFAULT NULL COMMENT '浏览器',
   `exception_detail` text DEFAULT NULL COMMENT '异常',
   `create_time` datetime NOT NULL COMMENT '创建时间',
+  `module` varchar(50) DEFAULT NULL COMMENT '模块',
+  `action` varchar(50) DEFAULT NULL COMMENT '动作',
+  `target_id` varchar(255) DEFAULT NULL COMMENT '目标ID',
+  `result` varchar(10) DEFAULT NULL COMMENT '结果：成功/失败',
   PRIMARY KEY (`log_id`) USING BTREE,
   KEY `idx_create_time_index` (`create_time`),
-  KEY `idx_log_type` (`log_type`)
+  KEY `idx_log_type` (`log_type`),
+  KEY `idx_module` (`module`),
+  KEY `idx_username` (`username`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3636 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=COMPACT COMMENT='系统日志';
 
 -- ----------------------------

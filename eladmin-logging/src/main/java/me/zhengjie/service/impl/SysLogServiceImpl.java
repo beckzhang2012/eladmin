@@ -65,7 +65,7 @@ public class SysLogServiceImpl implements SysLogService {
         if (status.equals(criteria.getLogType())) {
             return PageUtil.toPage(page.map(logErrorMapper::toDto));
         }
-        return PageUtil.toPage(page);
+        return PageUtil.toPage(page.map(logSmallMapper::toDto));
     }
 
     @Override
@@ -105,6 +105,36 @@ public class SysLogServiceImpl implements SysLogService {
         sysLog.setParams(JSON.toJSONString(params));
         sysLog.setBrowser(browser);
         sysLog.setDescription(aopLog.value());
+        sysLog.setModule(aopLog.module());
+        sysLog.setAction(aopLog.action());
+        
+        // 尝试获取目标ID
+        if (params.size() > 0) {
+            // 优先查找id字段
+            if (params.containsKey("id")) {
+                sysLog.setTargetId(params.getString("id"));
+            } else if (params.containsKey("ids")) {
+                sysLog.setTargetId(params.getString("ids"));
+            } else if (params.containsKey("user")) {
+                // 如果参数是user对象，尝试获取id
+                JSONObject user = params.getJSONObject("user");
+                if (user != null && user.containsKey("id")) {
+                    sysLog.setTargetId(user.getString("id"));
+                }
+            } else if (params.containsKey("role")) {
+                // 如果参数是role对象，尝试获取id
+                JSONObject role = params.getJSONObject("role");
+                if (role != null && role.containsKey("id")) {
+                    sysLog.setTargetId(role.getString("id"));
+                }
+            } else if (params.containsKey("menu")) {
+                // 如果参数是menu对象，尝试获取id
+                JSONObject menu = params.getJSONObject("menu");
+                if (menu != null && menu.containsKey("id")) {
+                    sysLog.setTargetId(menu.getString("id"));
+                }
+            }
+        }
 
         // 如果没有获取到用户名，尝试从参数中获取
         if(StringUtils.isBlank(sysLog.getUsername())){
@@ -180,6 +210,10 @@ public class SysLogServiceImpl implements SysLogService {
             map.put("描述", sysLog.getDescription());
             map.put("浏览器", sysLog.getBrowser());
             map.put("请求耗时/毫秒", sysLog.getTime());
+            map.put("模块", sysLog.getModule());
+            map.put("动作", sysLog.getAction());
+            map.put("目标ID", sysLog.getTargetId());
+            map.put("结果", sysLog.getResult());
             map.put("异常详情", new String(ObjectUtil.isNotNull(sysLog.getExceptionDetail()) ? sysLog.getExceptionDetail() : "".getBytes()));
             map.put("创建日期", sysLog.getCreateTime());
             list.add(map);
