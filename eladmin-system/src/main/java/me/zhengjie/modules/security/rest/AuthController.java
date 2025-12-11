@@ -73,6 +73,7 @@ public class AuthController {
     private final CaptchaConfig captchaConfig;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsServiceImpl userDetailsService;
+    private final me.zhengjie.modules.system.service.LoginLockService loginLockService;
 
     @Log("用户登录")
     @ApiOperation("登录授权")
@@ -94,6 +95,8 @@ public class AuthController {
         JwtUserDto jwtUser = userDetailsService.loadUserByUsername(authUser.getUsername());
         // 验证用户密码
         if (!passwordEncoder.matches(password, jwtUser.getPassword())) {
+            // 记录登录失败次数
+            loginLockService.recordFailedAttempt(authUser.getUsername());
             throw new BadRequestException("登录密码错误");
         }
         Authentication authentication = new UsernamePasswordAuthenticationToken(jwtUser, null, jwtUser.getAuthorities());
