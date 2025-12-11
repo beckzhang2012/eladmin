@@ -22,6 +22,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.zhengjie.annotation.Log;
+import me.zhengjie.annotation.Limit;
+import me.zhengjie.aspect.LimitType;
 import me.zhengjie.annotation.rest.AnonymousDeleteMapping;
 import me.zhengjie.annotation.rest.AnonymousGetMapping;
 import me.zhengjie.annotation.rest.AnonymousPostMapping;
@@ -77,6 +79,7 @@ public class AuthController {
     @Log("用户登录")
     @ApiOperation("登录授权")
     @AnonymousPostMapping(value = "/login")
+    @Limit(key = "login", period = 60, count = 10, name = "登录接口", prefix = "limit", limitType = LimitType.IP)
     public ResponseEntity<Object> login(@Validated @RequestBody AuthUserDto authUser, HttpServletRequest request) throws Exception {
         // 密码解密
         String password = RsaUtils.decryptByPrivateKey(RsaProperties.privateKey, authUser.getPassword());
@@ -124,6 +127,7 @@ public class AuthController {
 
     @ApiOperation("获取验证码")
     @AnonymousGetMapping(value = "/code")
+    @Limit(key = "code", period = 60, count = 10, name = "验证码接口", prefix = "limit", limitType = LimitType.IP)
     public ResponseEntity<Object> getCode() {
         // 获取运算的结果
         Captcha captcha = captchaConfig.getCaptcha();

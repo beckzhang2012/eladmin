@@ -18,7 +18,9 @@ package me.zhengjie.aspect;
 import cn.hutool.core.util.ObjUtil;
 import com.google.common.collect.ImmutableList;
 import me.zhengjie.annotation.Limit;
+import me.zhengjie.domain.LimitLog;
 import me.zhengjie.exception.BadRequestException;
+import me.zhengjie.service.LimitLogService;
 import me.zhengjie.utils.RequestHolder;
 import me.zhengjie.utils.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -34,6 +36,8 @@ import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * @author /
@@ -43,10 +47,12 @@ import java.lang.reflect.Method;
 public class LimitAspect {
 
     private final RedisTemplate<Object,Object> redisTemplate;
+    private final LimitLogService limitLogService;
     private static final Logger logger = LoggerFactory.getLogger(LimitAspect.class);
 
-    public LimitAspect(RedisTemplate<Object,Object> redisTemplate) {
+    public LimitAspect(RedisTemplate<Object,Object> redisTemplate, LimitLogService limitLogService) {
         this.redisTemplate = redisTemplate;
+        this.limitLogService = limitLogService;
     }
 
     @Pointcut("@annotation(me.zhengjie.annotation.Limit)")
@@ -76,8 +82,24 @@ public class LimitAspect {
         Long count = redisTemplate.execute(redisScript, keys, limit.count(), limit.period());
         if (ObjUtil.isNotNull(count) && count.intValue() <= limit.count()) {
             logger.info("第{}次访问key为 {}，描述为 [{}] 的接口", count, keys, limit.name());
+            // 记录限流日志
+            LimitLog limitLog = new LimitLog();
+            limitLog.setIp(StringUtils.getIp(request));
+            limitLog.setUri(request.getRequestURI());
+            limitLog.setCount(count.intValue());
+            limitLog.setIsLimited(false);
+            limitLog.setCreateTime(new Timestamp(new Date().getTime()));
+            limitLogService.save(limitLog);
             return joinPoint.proceed();
         } else {
+            // 记录限流日志
+            LimitLog limitLog = new LimitLog();
+            limitLog.setIp(StringUtils.getIp(request));
+            limitLog.setUri(request.getRequestURI());
+            limitLog.setCount(count.intValue());
+            limitLog.setIsLimited(true);
+            limitLog.setCreateTime(new Timestamp(new Date().getTime()));
+            limitLogService.save(limitLog);
             throw new BadRequestException("访问次数受限制");
         }
     }
