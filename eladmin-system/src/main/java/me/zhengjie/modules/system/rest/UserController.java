@@ -103,7 +103,7 @@ public class UserController {
         return new ResponseEntity<>(PageUtil.noData(),HttpStatus.OK);
     }
 
-    @Log("新增用户")
+    @Log(value = "新增用户", module = "用户管理", action = "新增")
     @ApiOperation("新增用户")
     @PostMapping
     @PreAuthorize("@el.check('user:add')")
@@ -115,7 +115,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @Log("修改用户")
+    @Log(value = "修改用户", module = "用户管理", action = "修改")
     @ApiOperation("修改用户")
     @PutMapping
     @PreAuthorize("@el.check('user:edit')")
@@ -125,7 +125,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("修改用户：个人中心")
+    @Log(value = "修改用户：个人中心", module = "用户管理", action = "修改")
     @ApiOperation("修改用户：个人中心")
     @PutMapping(value = "center")
     public ResponseEntity<Object> centerUser(@Validated(User.Update.class) @RequestBody User resources){
@@ -136,7 +136,7 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @Log("删除用户")
+    @Log(value = "删除用户", module = "用户管理", action = "删除")
     @ApiOperation("删除用户")
     @DeleteMapping
     @PreAuthorize("@el.check('user:del')")

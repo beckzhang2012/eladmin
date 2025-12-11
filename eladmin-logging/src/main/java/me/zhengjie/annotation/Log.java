@@ -28,4 +28,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Log {
     String value() default "";
+    
+    String module() default "";
+    
+    String action() default "";
 }

@@ -72,6 +72,15 @@ public class SysLog implements Serializable {
     @ApiModelProperty(value = "异常详细")
     private byte[] exceptionDetail;
 
+    @ApiModelProperty(value = "模块")
+    private String module;
+
+    @ApiModelProperty(value = "动作：新增/修改/删除")
+    private String action;
+
+    @ApiModelProperty(value = "目标ID")
+    private String targetId;
+
     /** 创建日期 */
     @CreationTimestamp
     @ApiModelProperty(value = "创建日期：yyyy-MM-dd HH:mm:ss")

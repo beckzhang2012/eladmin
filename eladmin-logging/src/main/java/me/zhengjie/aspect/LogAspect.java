@@ -69,6 +69,36 @@ public class LogAspect {
         SysLog sysLog = new SysLog("INFO",System.currentTimeMillis() - currentTime.get());
         currentTime.remove();
         HttpServletRequest request = RequestHolder.getHttpServletRequest();
+        // 获取Log注解中的module和action
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        Log log = method.getAnnotation(Log.class);
+        if (log != null) {
+            sysLog.setModule(log.module());
+            sysLog.setAction(log.action());
+        }
+        // 获取目标ID
+        Object[] args = joinPoint.getArgs();
+        if (args != null && args.length > 0) {
+            // 假设第一个参数是ID或者包含ID的对象
+            Object arg = args[0];
+            if (arg != null) {
+                if (arg instanceof Long || arg instanceof String) {
+                    sysLog.setTargetId(arg.toString());
+                } else {
+                    // 尝试从对象中获取ID属性
+                    try {
+                        Method getIdMethod = arg.getClass().getMethod("getId");
+                        Object id = getIdMethod.invoke(arg);
+                        if (id != null) {
+                            sysLog.setTargetId(id.toString());
+                        }
+                    } catch (Exception e) {
+                        // 忽略异常
+                    }
+                }
+            }
+        }
         sysLogService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getIp(request),joinPoint, sysLog);
         return result;
     }
@@ -85,6 +115,36 @@ public class LogAspect {
         currentTime.remove();
         sysLog.setExceptionDetail(ThrowableUtil.getStackTrace(e).getBytes());
         HttpServletRequest request = RequestHolder.getHttpServletRequest();
+        // 获取Log注解中的module和action
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
+        Log log = method.getAnnotation(Log.class);
+        if (log != null) {
+            sysLog.setModule(log.module());
+            sysLog.setAction(log.action());
+        }
+        // 获取目标ID
+        Object[] args = joinPoint.getArgs();
+        if (args != null && args.length > 0) {
+            // 假设第一个参数是ID或者包含ID的对象
+            Object arg = args[0];
+            if (arg != null) {
+                if (arg instanceof Long || arg instanceof String) {
+                    sysLog.setTargetId(arg.toString());
+                } else {
+                    // 尝试从对象中获取ID属性
+                    try {
+                        Method getIdMethod = arg.getClass().getMethod("getId");
+                        Object id = getIdMethod.invoke(arg);
+                        if (id != null) {
+                            sysLog.setTargetId(id.toString());
+                        }
+                    } catch (Exception ex) {
+                        // 忽略异常
+                    }
+                }
+            }
+        }
         sysLogService.save(getUsername(), StringUtils.getBrowser(request), StringUtils.getIp(request), (ProceedingJoinPoint)joinPoint, sysLog);
     }
 
