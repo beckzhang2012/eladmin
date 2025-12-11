@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户锁定管理</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 20px;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .btn-group {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>用户锁定管理</h1>
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" onclick="location.href='/api/userLock'">刷新列表</button>
+            <button type="button" class="btn btn-danger" onclick="batchUnlock()">批量解锁</button>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户ID</th>
+                    <th>锁定原因</th>
+                    <th>锁定过期时间</th>
+                    <th>是否锁定</th>
+                    <th>失败尝试次数</th>
+                    <th>创建时间</th>
+                    <th>更新时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="userLockTable">
+                <!-- 数据将通过AJAX加载 -->
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 加载用户锁定列表
+        function loadUserLockList() {
+            fetch('/api/userLock')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('userLockTable');
+                    tableBody.innerHTML = '';
+                    data.forEach(userLock => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${userLock.id}</td>
+                            <td>${userLock.userId}</td>
+                            <td>${userLock.lockReason}</td>
+                            <td>${userLock.lockExpireTime ? new Date(userLock.lockExpireTime).toLocaleString() : 'N/A'}</td>
+                            <td>${userLock.isLocked ? '是' : '否'}</td>
+                            <td>${userLock.failedAttempts}</td>
+                            <td>${new Date(userLock.createTime).toLocaleString()}</td>
+                            <td>${new Date(userLock.updateTime).toLocaleString()}</td>
+                            <td>
+                                <button class="btn btn-sm btn-success" onclick="unlockUser(${userLock.userId})">解锁</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error loading user lock list:', error));
+        }
+
+        // 解锁单个用户
+        function unlockUser(userId) {
+            if (confirm('确定要解锁该用户吗？')) {
+                fetch(`/api/userLock/unlock/${userId}`, {
+                    method: 'PUT'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('解锁成功');
+                        loadUserLockList();
+                    } else {
+                        alert('解锁失败');
+                    }
+                })
+                .catch(error => console.error('Error unlocking user:', error));
+            }
+        }
+
+        // 批量解锁用户
+        function batchUnlock() {
+            const userIds = prompt('请输入要解锁的用户ID（用逗号分隔）：');
+            if (userIds) {
+                fetch('/api/userLock/unlock/batch', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userIds.split(',').map(id => parseInt(id.trim())))
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('批量解锁成功');
+                        loadUserLockList();
+                    } else {
+                        alert('批量解锁失败');
+                    }
+                })
+                .catch(error => console.error('Error batch unlocking users:', error));
+            }
+        }
+
+        // 页面加载时加载数据
+        document.addEventListener('DOMContentLoaded', loadUserLockList);
+    </script>
+</body>
+</html>

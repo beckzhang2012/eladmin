@@ -35,5 +35,15 @@ public class LoginProperties {
      */
     private boolean singleLogin = false;
 
+    /**
+     * 登录失败次数阈值，默认5次
+     */
+    private int failedAttemptsThreshold = 5;
+
+    /**
+     * 锁定时间（分钟），默认15分钟
+     */
+    private int lockDuration = 15;
+
     public static final String cacheKey = "user-login-cache:";
 }
