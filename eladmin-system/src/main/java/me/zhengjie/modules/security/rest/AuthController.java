@@ -36,6 +36,12 @@ import me.zhengjie.modules.security.service.UserDetailsServiceImpl;
 import me.zhengjie.modules.security.service.dto.AuthUserDto;
 import me.zhengjie.modules.security.service.dto.JwtUserDto;
 import me.zhengjie.modules.security.service.OnlineUserService;
+import me.zhengjie.modules.system.repository.UserLockRepository;
+import me.zhengjie.modules.system.domain.UserLock;
+import me.zhengjie.exception.BadRequestException;
+import java.util.Optional;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import me.zhengjie.utils.RsaUtils;
 import me.zhengjie.utils.RedisUtils;
 import me.zhengjie.utils.SecurityUtils;
@@ -73,6 +79,7 @@ public class AuthController {
     private final CaptchaConfig captchaConfig;
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsServiceImpl userDetailsService;
+    private final UserLockRepository userLockRepository;
 
     @Log("用户登录")
     @ApiOperation("登录授权")
@@ -92,10 +99,56 @@ public class AuthController {
         }
         // 获取用户信息
         JwtUserDto jwtUser = userDetailsService.loadUserByUsername(authUser.getUsername());
+        
+        // 检查用户是否被锁定
+        Optional<UserLock> userLockOpt = userLockRepository.findByUserId(jwtUser.getUser().getId());
+        if (userLockOpt.isPresent()) {
+            UserLock userLock = userLockOpt.get();
+            if (userLock.getIsLocked() && userLock.getLockExpireTime().after(new Date())) {
+                throw new BadRequestException("账号已被锁定，请在" + userLock.getLockExpireTime() + "后重试");
+            } else if (userLock.getIsLocked() && userLock.getLockExpireTime().before(new Date())) {
+                // 锁定已过期，解锁用户
+                userLock.setIsLocked(false);
+                userLockRepository.save(userLock);
+            }
+        }
+        
         // 验证用户密码
         if (!passwordEncoder.matches(password, jwtUser.getPassword())) {
-            throw new BadRequestException("登录密码错误");
+            // 登录失败，更新失败次数
+            String cacheKey = LoginProperties.cacheKey + authUser.getUsername();
+            Integer failedAttempts = redisUtils.get(cacheKey, Integer.class);
+            if (failedAttempts == null) {
+                failedAttempts = 1;
+            } else {
+                failedAttempts++;
+            }
+            redisUtils.set(cacheKey, failedAttempts, loginProperties.getLockDuration(), TimeUnit.MINUTES);
+            
+            // 检查是否达到失败次数阈值
+            if (failedAttempts >= loginProperties.getFailedAttemptsThreshold()) {
+                // 锁定用户
+                UserLock userLock = userLockOpt.orElse(new UserLock());
+                userLock.setUserId(jwtUser.getUser().getId());
+                userLock.setLockReason("登录失败" + failedAttempts + "次");
+                Date lockExpireTime = new Date();
+                lockExpireTime.setTime(lockExpireTime.getTime() + loginProperties.getLockDuration() * 60 * 1000);
+                userLock.setLockExpireTime(lockExpireTime);
+                userLock.setIsLocked(true);
+                userLockRepository.save(userLock);
+                
+                // 清除失败次数缓存
+                redisUtils.del(cacheKey);
+                
+                throw new BadRequestException("登录失败" + failedAttempts + "次，账号已被锁定" + loginProperties.getLockDuration() + "分钟");
+            } else {
+                throw new BadRequestException("登录密码错误，还有" + (loginProperties.getFailedAttemptsThreshold() - failedAttempts) + "次机会");
+            }
         }
+        
+        // 登录成功，清除失败次数缓存
+        String cacheKey = LoginProperties.cacheKey + authUser.getUsername();
+        redisUtils.del(cacheKey);
         Authentication authentication = new UsernamePasswordAuthenticationToken(jwtUser, null, jwtUser.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         // 生成令牌

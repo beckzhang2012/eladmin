@@ -1,0 +1,38 @@
+# 应用配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# 数据库配置
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  datasource:
+    url: jdbc:mysql://localhost:3306/eladmin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  redis:
+    host: localhost
+    port: 6379
+    password: 
+    database: 0
+
+# 安全配置
+security:
+  login:
+    failed-attempts-threshold: 5 # 登录失败次数阈值，默认5次
+    lock-duration: 900000 # 锁定时间，单位毫秒，默认15分钟（900000毫秒）
+
+# 日志配置
+logging:
+  level:
+    me.zhengjie: debug

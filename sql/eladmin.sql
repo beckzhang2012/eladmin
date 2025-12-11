@@ -845,4 +845,21 @@ BEGIN;
 INSERT INTO `tool_s3_storage` (`storage_id`, `file_name`, `file_real_name`, `file_size`, `file_mime_type`, `file_type`, `file_path`, `create_by`, `update_by`, `create_time`, `update_time`) VALUES (4, 'tx.jpg', '2ca1de24d8fa422eae4ede30e97c46d8.jpg', '29.67KB', 'image/jpeg', 'jpg', '2025-06/2ca1de24d8fa422eae4ede30e97c46d8.jpg', 'admin', 'admin', '2025-06-25 15:48:22', '2025-06-25 15:48:22');
 COMMIT;
 
+-- ----------------------------
+-- Table structure for sys_user_lock
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_user_lock`;
+CREATE TABLE `sys_user_lock` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `user_id` bigint(20) NOT NULL COMMENT '用户ID',
+  `lock_reason` varchar(255) DEFAULT NULL COMMENT '锁定原因',
+  `lock_expire_time` datetime NOT NULL COMMENT '锁定到期时间',
+  `is_locked` bit(1) DEFAULT b'1' COMMENT '是否锁定',
+  `create_time` datetime DEFAULT NULL COMMENT '创建日期',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_is_locked` (`is_locked`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='用户锁定记录表';
+
 SET FOREIGN_KEY_CHECKS = 1;
