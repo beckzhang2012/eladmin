@@ -40,11 +40,16 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final RoleService roleService;
     private final DataService dataService;
     private final UserCacheManager userCacheManager;
+    private final me.zhengjie.modules.system.service.LoginLockService loginLockService;
 
     @Override
     public JwtUserDto loadUserByUsername(String username) {
         JwtUserDto jwtUserDto = userCacheManager.getUserCache(username);
         if(jwtUserDto == null){
+            // 检查用户是否被锁定
+            if (loginLockService.isLocked(username)) {
+                throw new BadRequestException("账号已被锁定，请15分钟后重试或联系管理员解锁");
+            }
             UserDto user = userService.getLoginData(username);
             if (user == null) {
                 throw new BadRequestException("用户不存在");
