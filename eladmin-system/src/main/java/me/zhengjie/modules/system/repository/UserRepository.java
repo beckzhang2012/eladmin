@@ -20,6 +20,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -136,4 +137,94 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     @Modifying
     @Query(value = "update sys_user set password = ?2 where user_id in ?1",nativeQuery = true)
     void resetPwd(Set<Long> ids, String pwd);
+
+    /**
+     * 统计用户状态
+     * @param enabled 是否启用
+     * @return /
+     */
+    long countByEnabled(Boolean enabled);
+
+    /**
+     * 按部门统计用户数量
+     * @param deptId 部门ID
+     * @return /
+     */
+    @Query(value = "SELECT count(1) FROM sys_user u WHERE u.dept_id = ?1", nativeQuery = true)
+    long countByDeptId(Long deptId);
+
+    /**
+     * 按部门和状态统计用户数量
+     * @param deptId 部门ID
+     * @param enabled 是否启用
+     * @return /
+     */
+    @Query(value = "SELECT count(1) FROM sys_user u WHERE u.dept_id = ?1 AND u.enabled = ?2", nativeQuery = true)
+    long countByDeptIdAndEnabled(Long deptId, Boolean enabled);
+
+    /**
+     * 按角色统计用户数量
+     * @param roleId 角色ID
+     * @return /
+     */
+    @Query(value = "SELECT count(1) FROM sys_user u, sys_users_roles r WHERE u.user_id = r.user_id AND r.role_id = ?1", nativeQuery = true)
+    long countUsersByRoleId(Long roleId);
+
+    /**
+     * 统计所有用户数量
+     * @return /
+     */
+    @Query(value = "SELECT count(1) FROM sys_user", nativeQuery = true)
+    long countAllUsers();
+
+    /**
+     * 根据时间范围统计新增用户数量
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return /
+     */
+    @Query(value = "SELECT count(1) FROM sys_user u WHERE u.create_time BETWEEN ?1 AND ?2", nativeQuery = true)
+    long countUsersByCreateTimeBetween(Timestamp startTime, Timestamp endTime);
+
+    /**
+     * 获取最近活跃的用户（根据更新时间）
+     * @param days 天数
+     * @return /
+     */
+    @Query(value = "SELECT u.* FROM sys_user u WHERE u.update_time >= DATE_SUB(NOW(), INTERVAL ?1 DAY) ORDER BY u.update_time DESC", nativeQuery = true)
+    List<User> findActiveUsersInDays(int days);
+
+    /**
+     * 批量启用/禁用用户
+     * @param ids 用户ID列表
+     * @param enabled 是否启用
+     */
+    @Modifying
+    @Query(value = "update sys_user set enabled = ?2 where user_id in ?1",nativeQuery = true)
+    void batchUpdateEnabled(Set<Long> ids, Boolean enabled);
+
+    /**
+     * 批量修改用户部门
+     * @param ids 用户ID列表
+     * @param deptId 部门ID
+     */
+    @Modifying
+    @Query(value = "update sys_user set dept_id = ?2 where user_id in ?1",nativeQuery = true)
+    void batchUpdateDept(Set<Long> ids, Long deptId);
+
+    /**
+     * 批量删除用户角色关联
+     * @param ids 用户ID列表
+     */
+    @Modifying
+    @Query(value = "delete from sys_users_roles where user_id in ?1",nativeQuery = true)
+    void batchDeleteUserRoles(Set<Long> ids);
+
+    /**
+     * 批量删除用户岗位关联
+     * @param ids 用户ID列表
+     */
+    @Modifying
+    @Query(value = "delete from sys_users_jobs where user_id in ?1",nativeQuery = true)
+    void batchDeleteUserJobs(Set<Long> ids);
 }
